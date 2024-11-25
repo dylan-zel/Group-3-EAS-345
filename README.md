@@ -1,2 +1,2 @@
 # Group-3-EAS-345
-Predicting trends in schools (Dylan, Hunter, Jack, Emmitt)
+Predicting important aspects of United States colleges (Dylan, Hunter, Jack, Emmitt)
