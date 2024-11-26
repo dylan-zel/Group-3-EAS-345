@@ -27,29 +27,30 @@ install.packages('ggplot2')
 library("sos")
 library('poorman')
 library('ggplot2')
-R.versionfindFn("na_if()")
+#R.versionfindFn("na_if()")
 
 # Load the MERGED2022_23_PP dataset
 data <- read.csv("MERGED2022_23_PP.csv")
 
-# Create data frame
+# Create inital data frame, note that some columns comletely Zero or N/A. Must be addressed
 table1 <- data.frame(data$UNITID, data$LOCALE, data$CCSIZSET, data$UGDS,
                      data$GRADS, data$SAT_AVG_ALL, data$COSTT4_A, data$AVGFACSAL,
                      data$IRPS_MEN, data$C100_4, data$RET_FT4, data$PCTFLOAN ,
-                     data$DEBT_MDN, data$MEDIAN_HH_INC, stringsAsFactors = TRUE)
+                     data$DEBT_MDN, data$MEDIAN_HH_INC, data$ADM_RATE_ALL, stringsAsFactors = TRUE)
 
 # Creating TUITONFEE column, which is an average of in-state and out-of-state tuition costs.
 TUITIONFEE <- data.frame(data$TUITIONFEE_IN, data$TUITIONFEE_OUT)
 TUITIONFEE <- rowMeans(TUITIONFEE)
 
 
-# Create updated data frame, removing comletely N/A columns from Table 1, adding TUITFTE and TUITIONFEE
+# Create updated data frame, removing comletely N/A columns from Table 1, adding TUITFTE and TUITIONFEE (TUITONFEE_IN, TUITIONFEE_OUT, TUITONFEE)
 table2 <- data.frame(data$UNITID, data$LOCALE, data$CCSIZSET, data$UGDS,
                      data$GRADS, data$SAT_AVG_ALL, data$COSTT4_A, data$AVGFACSAL,
-                     data$IRPS_MEN, data$C100_4, data$RET_FT4, data$PCTFLOAN, data$TUITFTE, data$TUITIONFEE_IN, data$TUITIONFEE_OUT, TUITIONFEE, stringsAsFactors = TRUE)
+                     data$IRPS_MEN, data$C100_4, data$RET_FT4, data$PCTFLOAN, data$ADM_RATE_ALL, data$TUITFTE, data$TUITIONFEE_IN, data$TUITIONFEE_OUT, TUITIONFEE, stringsAsFactors = TRUE)
 
 summary(table2)
 
+# Table 2 still has rows consisting of Zero or N/A columns. School size and Number or graduates are also providing null values (<1). These entries must be converted to N/A and be removed -> tableNONA
 tableNONA <- na_if(table2,0)
 tableNONA$data.CCSIZSET[tableNONA$data.CCSIZSET < 1] <- NA 
 tableNONA$data.GRADS[tableNONA$data.GRADS < 1] <- NA
@@ -58,14 +59,14 @@ tableNONA <-na.omit(tableNONA)
 
 summary(tableNONA)
 
-#Creating training training and testing data
+#Creating training training and testing data (Cutting total data in half: even and odd entries)
 train <- seq(2,918,2)
 test <- seq(1,918,2)
 
 
-TRAIN <- data.frame(tableNONA$data.UNITID[train],tableNONA$data.LOCALE[train], tableNONA$data.CCSIZSET[train], tableNONA$data.UGDS[train], tableNONA$data.GRADS[train], tableNONA$data.SAT_AVG_ALL[train], tableNONA$data.COSTT4_A[train], tableNONA$data.AVGFACSAL[train],  tableNONA$data.IRPS_MEN[train], tableNONA$data.C100_4[train], tableNONA$data.RET_FT4[train], tableNONA$data.PCTFLOAN[train], tableNONA$data.TUITFTE[train], tableNONA$TUITIONFEE[train]  )
+TRAIN <- data.frame(tableNONA$data.UNITID[train],tableNONA$data.LOCALE[train], tableNONA$data.CCSIZSET[train], tableNONA$data.UGDS[train], tableNONA$data.GRADS[train], tableNONA$data.SAT_AVG_ALL[train], tableNONA$data.COSTT4_A[train], tableNONA$data.AVGFACSAL[train],  tableNONA$data.IRPS_MEN[train], tableNONA$data.C100_4[train], tableNONA$data.RET_FT4[train], tableNONA$data.PCTFLOAN[train], tableNONA$data.TUITFTE[train], tableNONA$TUITIONFEE[train], tableNONA$data.ADM_RATE_ALL[train]  )
 
-TEST <- data.frame(tableNONA$data.UNITID[test],tableNONA$data.LOCALE[test], tableNONA$data.CCSIZSET[test], tableNONA$data.UGDS[test], tableNONA$data.GRADS[test], tableNONA$data.SAT_AVG_ALL[test], tableNONA$data.COSTT4_A[test], tableNONA$data.AVGFACSAL[test],  tableNONA$data.IRPS_MEN[test], tableNONA$data.C100_4[test], tableNONA$data.RET_FT4[test], tableNONA$data.PCTFLOAN[train], tableNONA$data.TUITFTE[test], tableNONA$TUITIONFEE[test]  )
+TEST <- data.frame(tableNONA$data.UNITID[test],tableNONA$data.LOCALE[test], tableNONA$data.CCSIZSET[test], tableNONA$data.UGDS[test], tableNONA$data.GRADS[test], tableNONA$data.SAT_AVG_ALL[test], tableNONA$data.COSTT4_A[test], tableNONA$data.AVGFACSAL[test],  tableNONA$data.IRPS_MEN[test], tableNONA$data.C100_4[test], tableNONA$data.RET_FT4[test], tableNONA$data.PCTFLOAN[train], tableNONA$data.TUITFTE[test], tableNONA$TUITIONFEE[test], tableNONA$data.ADM_RATE_ALL[test]  )
 
 # Display the first few rows
 #head(tableNONA,10)
@@ -78,7 +79,7 @@ summary(TEST)
 ```
 
 
-Now that our data is cleaned an split into training an testing data, we can start analyzing how these obtained variables relate to one another.
+Now that our data is cleaned an split into training an testing data, we can start analyzing with visuals how these obtained variables relate to one another.
 ```{r}
 # Density plot of Cost of Attendance. Note that the highest density occurs for $25,000, $50,000, and $75,000: Multimodal for three peaks.
 ggplot(tableNONA, aes(x=data.COSTT4_A)) + geom_density()
@@ -89,30 +90,41 @@ ggplot(tableNONA, aes(x=data.TUITFTE)) + geom_density()
 # Density plot of Cost of Attendance. Note that the highest density occurs for $15,000, $35,000, and $60,000: Multimodal for three peaks.
 ggplot(tableNONA, aes(x=TUITIONFEE)) + geom_density()
 
+# Box plot comparing the three variables considered to for measuring tuition cost.
 boxplot(tableNONA$TUITIONFEE, tableNONA$data.TUITFTE, tableNONA$data.COSTT4_A,
         main = 'Boxplots for Measurements of Tuition Costs',
         at = c(1,2,3),
-        names = c('TUITIONFEE','TUITFTE','COSTT4_A')
-)
+        names = c('TUITIONFEE','TUITFTE','COSTT4_A'),
+        ylab = "Tuition Cost ($)",
+        xlab = 'Variables for Tuition Cost') +
+  theme_minimal()
 
+
+# Box plot showing distribution of school sizes
 boxplot(tableNONA$data.CCSIZSET,
-        meain = 'Boxplot for School Sizes'
+        main = 'Boxplot for School Sizes'
 )
 
+# Box plot showing distribution of admission rates
+boxplot(tableNONA$data.ADM_RATE_ALL,
+        main = 'Boxplot for Admission Rates',
+        at = c(1),
+        names = c('Admission Rates')
+)
 
 # Scatter plot of Tuition Cost vs Level of Urbanization, with added trendline, note the lack of trends
-ggplot(tableNONA, aes(x=data.LOCALE, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs SAT Scores")
+ggplot(tableNONA, aes(x=data.LOCALE, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs Level of Urbanization")
 
 # Scatter plot of Tuition Cost vs Retention Rate, with added trendline, note the somewhat exponential trendline
-ggplot(tableNONA, aes(x=data.RET_FT4, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs SAT Scores")
+ggplot(tableNONA, aes(x=data.RET_FT4, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs Retention Rate")
 
 # Scatter plot of Tuition Revenue vs SAT Scores, with added trendline
-ggplot(tableNONA, aes(x=data.SAT_AVG_ALL, y=data.TUITFTE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs SAT Scores")
-
-# Scatter plot of Cost of Attendance vs SAT Scores, with added trendline
-ggplot(tableNONA, aes(y=data.COSTT4_A, x=data.SAT_AVG_ALL)) + geom_point() + geom_smooth() + ggtitle("Cost of Attendance vs SAT Scores")
+ggplot(tableNONA, aes(x=data.SAT_AVG_ALL, y=data.TUITFTE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs Tuition Revenue")
 
 # Scatter plot of Tuition Cost vs SAT Scores, with added trendline
+ggplot(tableNONA, aes(y=TUITIONFEE, x=data.SAT_AVG_ALL)) + geom_point() + geom_smooth() + ggtitle("Tuition Cost vs SAT Scores")
+
+# Scatter plot of Cost of Attendance vs SAT Scores, with added trendline
 ggplot(tableNONA, aes(y=data.COSTT4_A, x=data.SAT_AVG_ALL)) + geom_point() + geom_smooth() + ggtitle("Cost of Attendance vs SAT Scores")
 
 # Scatter plot of Cost of Attendance vs Number of Undergraduates
@@ -143,6 +155,10 @@ ggplot(tableNONA, aes(x = data.CCSIZSET) ) +
   labs(title = "Distribution of School Sizes",
        x = "School Size",
        y = "Frequency") 
+
+# Correlation matrix showing how much each variable relates to another
+cor_matrix <- cor(tableNONA)
+cor_matrix
 ```
 
 
