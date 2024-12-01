@@ -1,24 +1,37 @@
+---
+title: "EAS 345 Project"
+author: "Jack Mandura"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-# Load the MERGED2022_23_PP dataset
-data <- read.csv("MERGED2022_23_PP.csv")
+## R Markdown
 
-# Create data frame
-table1 <- data.frame(data$UNITID, data$LOCALE, data$CCSIZSET, data$UGDS,
-                     data$GRADS, data$SAT_AVG_ALL, data$COSTT4_A, data$AVGFACSAL,
-                     data$IRPS_MEN, data$C100_4, data$RET_FT4, data$PCTFLOAN ,
-                     data$DEBT_MDN, data$MEDIAN_HH_INC, stringsAsFactors = TRUE)
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-# Eliminating completely N/A columns
-table2 <- data.frame(data$UNITID, data$LOCALE, data$CCSIZSET, data$UGDS, data$GRADS,
-                     data$SAT_AVG_ALL, data$COSTT4_A, data$AVGFACSAL, data$IRPS_MEN,
-                     data$C100_4, data$RET_FT4, data$PCTFLOAN , stringsAsFactors = TRUE)
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-table.noNA <-na.omit(table2)
+```{r }
+summary()
+```
 
+## Including Plots
 
+You can also embed plots, for example:
 
-##################################################################
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Loading the data 
 ```{r}
 install.packages("sos")
 install.packages("poorman")
@@ -57,7 +70,7 @@ summary(table2)
 tableNONA <- na_if(table2,0)
 tableNONA$data.CCSIZSET[tableNONA$data.CCSIZSET < 1] <- NA 
 tableNONA$data.GRADS[tableNONA$data.GRADS < 1] <- NA
-#na_if(tableNONA$data.CCSIZSET, -2) %>% 
+  #na_if(tableNONA$data.CCSIZSET, -2) %>% 
 #Following line is ignored if we want to keep all N/A data
 tableNONA <-na.omit(tableNONA)
 
@@ -101,22 +114,22 @@ boxplot(tableNONA$TUITIONFEE, tableNONA$data.TUITFTE, tableNONA$data.COSTT4_A,
         main = 'Boxplots for Measurements of Tuition Costs',
         at = c(1,2,3),
         names = c('TUITIONFEE','TUITFTE','COSTT4_A'),
-        ylab = "Tuition Cost ($)",
-        xlab = 'Variables for Tuition Cost') +
+       ylab = "Tuition Cost ($)",
+       xlab = 'Variables for Tuition Cost') +
   theme_minimal()
 
 
 # Box plot showing distribution of school sizes
 boxplot(tableNONA$data.CCSIZSET,
         main = 'Boxplot for School Sizes'
-)
+        )
 
 # Box plot showing distribution of admission rates
 boxplot(tableNONA$data.ADM_RATE_ALL,
         main = 'Boxplot for Admission Rates',
         at = c(1),
         names = c('Admission Rates')
-)
+        )
 
 # Scatter plot of Tuition Cost vs Level of Urbanization, with added trendline, note the lack of trends
 ggplot(tableNONA, aes(x=data.LOCALE, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs Level of Urbanization")
@@ -346,8 +359,6 @@ aictab(cand.set = models, modnames = modelnames )
 
 
 
-
-
 Now that we have our multiple linear regression model for tuition cost. Let's now create some single linear regression models to allow us to estimate future independent variables over time. This will in turn allow us to predict future tuition costs.
 
 We must first create our data tables for the important variables dating back to 2010.
@@ -519,7 +530,7 @@ TIMElist <- c(1,2,3,4)
 entry <- 4
 
 
-UGDSvec <- c(UGDSlist[entry,1], UGDSlist[entry,2], UGDSlist[entry,3], UGDSlist[entry,4], UGDSlist[entry,5], UGDSlist[entry,6], UGDSlist[entry,7], UGDSlist[entry,8], UGDSlist[entry,9], UGDSlist[entry,10], UGDSlist[entry,11], UGDSlist[entry,12], UGDSlist[entry,13])
+#UGDSvec <- c(UGDSlist[entry,1], UGDSlist[entry,2], UGDSlist[entry,3], UGDSlist[entry,4], UGDSlist[entry,5], UGDSlist[entry,6], UGDSlist[entry,7], UGDSlist[entry,8], UGDSlist[entry,9], UGDSlist[entry,10], UGDSlist[entry,11], UGDSlist[entry,12], UGDSlist[entry,13])
 
 
 # For vector of UGDS over past 13 years, the trend is not accurrate or linear, with an increasing and decreasing slope: This can be remedied by only taking the past 4 years into account, to only analyze recent trends. The TIMElist vecotr will be altered to reflect this. 
@@ -646,7 +657,7 @@ ADM_RATE_ALLguess
 ```
 
 We can now plug these estimated variables into the final model selection: 
-  Model 17
+Model 17
 ```{r}
 TUITIONguess <- -131.5*(LOCALEguess) - 932.8*(CCSIZSETguess) - 0.549*(UGDSguess) + 35.34*(SAT_AVG_ALLguess) + 1.4*(AVGFACSALguess) + 32170*(C100_4guess) + 17890*(PCTFLOANguess) - 10560*(IRPS_MENguess) - 4709*(ADM_RATE_ALLguess)   - 21480
 TUITIONguess
