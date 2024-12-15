@@ -106,8 +106,8 @@ ggplot(tableNONA, aes(x=data.COSTT4_A)) + geom_density()
 # Density plot of Tuition Revenue. NOte that highest density occurs at around $10,000. Then trends downward.
 ggplot(tableNONA, aes(x=data.TUITFTE)) + geom_density()
 
-# Density plot of Cost of Attendance. Note that the highest density occurs for $15,000, $35,000, and $60,000: Multimodal for three peaks.
-ggplot(tableNONA, aes(x=TUITIONFEE)) + geom_density()
+# Density plot of Tuition Cost. Note that the highest density occurs for $15,000, $35,000, and $60,000: Multimodal for three peaks.
+ggplot(tableNONA, aes(x=TUITIONFEE)) + xlab('Tuition Cost (TUITIONFEE)') +  ggtitle('Density Plot for Tuition Cost') + geom_density()
 
 # Box plot comparing the three variables considered to for measuring tuition cost.
 boxplot(tableNONA$TUITIONFEE, tableNONA$data.TUITFTE, tableNONA$data.COSTT4_A,
@@ -126,10 +126,21 @@ boxplot(tableNONA$data.CCSIZSET,
 
 # Box plot showing distribution of admission rates
 boxplot(tableNONA$data.ADM_RATE_ALL,
+        y = 'Admission Rate',
         main = 'Boxplot for Admission Rates',
         at = c(1),
         names = c('Admission Rates')
         )
+
+# Box plot showing distribution of completion rates
+boxplot(tableNONA$data.C100_4,
+        ylab = 'Completion Rate',
+        xlab = 'Completion Rate (C100_4)',
+        main = 'Boxplot for Completion Rates',
+        at = c(1),
+        names = c('Completion Rates')
+        )
+
 
 # Scatter plot of Tuition Cost vs Level of Urbanization, with added trendline, note the lack of trends
 ggplot(tableNONA, aes(x=data.LOCALE, y=TUITIONFEE)) + geom_point() + geom_smooth() + ggtitle("Tuition vs Level of Urbanization")
@@ -166,6 +177,13 @@ ggplot(tableNONA, aes(x = data.CCSIZSET)) +
   geom_histogram(binwidth = 2, fill = "lightblue", color = "black") +
   labs(title = "Distribution of School Sizes",
        x = "School Size",
+       y = "Frequency") 
+
+# Histogram showing distribution of level of urbanization, 
+ggplot(tableNONA, aes(x = data.LOCALE)) +
+  geom_histogram(binwidth = 2, fill = "lightblue", color = "black") +
+  labs(title = "Distribution of Level of Urbanization",
+       x = "Level of Urbanization",
        y = "Frequency") 
 
 # Bar Chart showing distribution of school sizes, note that smallest school size is 6 (scale starts at 1), theres several small schools that are being omitted.
@@ -621,17 +639,17 @@ CCSIZSETguess
 
 #For UGDS prediction
 summary(UGDSmodel)
-UGDSguess = -137*(5) + 4030
+UGDSguess = -246.7*(5) + 4861.5
 UGDSguess
 
 #For SAT_AVG_ALL prediction
 summary(SAT_AVG_ALLmodel)
-SAT_AVG_ALLguess = -5.9*(5) + 976.5
+SAT_AVG_ALLguess = -6.6*(5) + 1090.5
 SAT_AVG_ALLguess
 
 #For AVGFACSAL prediction
 summary(AVGFACSALmodel)
-AVGFACSALguess = -18.6*(5) + 7514
+AVGFACSALguess = 42.3*(5) + 7699
 AVGFACSALguess
 
 #For IRPS_MEN prediction - Use Previous year data, as only 2023 is provided.
@@ -640,26 +658,34 @@ IRPS_MENguess
 
 #For C100_4 prediction
 summary(C100_4model)
-C100_4guess = -0.00069*(5) + 0.12920
+C100_4guess = .002460*(5) + 0.102750
 C100_4guess
 
 #For PCTFLOAN prediction
 summary(PCTFLOANmodel)
-PCTFLOANguess = -0.01051*(5) + 0.81425
+PCTFLOANguess = -0.012390*(5) + 0.566550
 PCTFLOANguess
 
 #For ADM_RATE_ALL prediction
 summary(ADM_RATE_ALLmodel)
-ADM_RATE_ALLguess = 0.002734*(5) + 0.971944
+ADM_RATE_ALLguess = 0.017076*(5) + 0.896306
 ADM_RATE_ALLguess
 
 
 ```
 
-We can now plug these estimated variables into the final model selection: 
-Model 17
+We can now plug these estimated variables into the final model selection of 17, 18, and 19: 
 ```{r}
+
+# For Model 17
 TUITIONguess <- -131.5*(LOCALEguess) - 932.8*(CCSIZSETguess) - 0.549*(UGDSguess) + 35.34*(SAT_AVG_ALLguess) + 1.4*(AVGFACSALguess) + 32170*(C100_4guess) + 17890*(PCTFLOANguess) - 10560*(IRPS_MENguess) - 4709*(ADM_RATE_ALLguess)   - 21480
+
+# For Model 18
+TUITIONguess <- -127.2*(LOCALEguess) - 1041*(CCSIZSETguess) - 0.553*(UGDSguess) + 38.4*(SAT_AVG_ALLguess) + 1.5*(AVGFACSALguess) + 32710*(C100_4guess) + 17020*(PCTFLOANguess) - 9679*(IRPS_MENguess)  - 28280
+
+#Notice that Model 19 has the smallest Error of 1295, smaller than Model 17 and 18, which were 1719 and 1857 respectfully.
+# For Model 19
+TUITIONguess <- -134.6*(LOCALEguess) - 1032*(CCSIZSETguess) - 0.564*(UGDSguess) + 36.92*(SAT_AVG_ALLguess) + 1.5*(AVGFACSALguess) + 33130*(C100_4guess) + 18060*(PCTFLOANguess) - 32130
 TUITIONguess
 
 TUITIONtest = TUITIONFEElist[entry]

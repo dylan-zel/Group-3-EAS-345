@@ -346,8 +346,6 @@ aictab(cand.set = models, modnames = modelnames )
 
 
 
-
-
 Now that we have our multiple linear regression model for tuition cost. Let's now create some single linear regression models to allow us to estimate future independent variables over time. This will in turn allow us to predict future tuition costs.
 
 We must first create our data tables for the important variables dating back to 2010.
@@ -519,7 +517,7 @@ TIMElist <- c(1,2,3,4)
 entry <- 4
 
 
-UGDSvec <- c(UGDSlist[entry,1], UGDSlist[entry,2], UGDSlist[entry,3], UGDSlist[entry,4], UGDSlist[entry,5], UGDSlist[entry,6], UGDSlist[entry,7], UGDSlist[entry,8], UGDSlist[entry,9], UGDSlist[entry,10], UGDSlist[entry,11], UGDSlist[entry,12], UGDSlist[entry,13])
+#UGDSvec <- c(UGDSlist[entry,1], UGDSlist[entry,2], UGDSlist[entry,3], UGDSlist[entry,4], UGDSlist[entry,5], UGDSlist[entry,6], UGDSlist[entry,7], UGDSlist[entry,8], UGDSlist[entry,9], UGDSlist[entry,10], UGDSlist[entry,11], UGDSlist[entry,12], UGDSlist[entry,13])
 
 
 # For vector of UGDS over past 13 years, the trend is not accurrate or linear, with an increasing and decreasing slope: This can be remedied by only taking the past 4 years into account, to only analyze recent trends. The TIMElist vecotr will be altered to reflect this. 
@@ -645,10 +643,18 @@ ADM_RATE_ALLguess
 
 ```
 
-We can now plug these estimated variables into the final model selection: 
-  Model 17
-```{r}
+We can now plug these estimated variables into the final model selection of 17, 18, and 19: 
+  ```{r}
+
+# For Model 17
 TUITIONguess <- -131.5*(LOCALEguess) - 932.8*(CCSIZSETguess) - 0.549*(UGDSguess) + 35.34*(SAT_AVG_ALLguess) + 1.4*(AVGFACSALguess) + 32170*(C100_4guess) + 17890*(PCTFLOANguess) - 10560*(IRPS_MENguess) - 4709*(ADM_RATE_ALLguess)   - 21480
+
+# For Model 18
+TUITIONguess <- -127.2*(LOCALEguess) - 1041*(CCSIZSETguess) - 0.553*(UGDSguess) + 38.4*(SAT_AVG_ALLguess) + 1.5*(AVGFACSALguess) + 32710*(C100_4guess) + 17020*(PCTFLOANguess) - 9679*(IRPS_MENguess)  - 28280
+
+#Notice that Model 19 has the smallest Error of 1295, smaller than Model 17 and 18, which were 1719 and 1857 respectfully.
+# For Model 19
+TUITIONguess <- -134.6*(LOCALEguess) - 1032*(CCSIZSETguess) - 0.564*(UGDSguess) + 36.92*(SAT_AVG_ALLguess) + 1.5*(AVGFACSALguess) + 33130*(C100_4guess) + 18060*(PCTFLOANguess) - 32130
 TUITIONguess
 
 TUITIONtest = TUITIONFEElist[entry]
